@@ -1,0 +1,113 @@
+---
+title: "Machine Learning - Barbell Lifts"
+author: "Fernanda Sánchez"
+date: "9/18/2020"
+output: html_document
+---
+
+# Overview
+Using devices such as Jawbone Up, Nike FuelBand, and Fitbit it is now possible to collect a large amount of data about personal activity relatively inexpensively. These type of devices are part of the quantified self movement – a group of enthusiasts who take measurements about themselves regularly to improve their health, to find patterns in their behavior, or because they are tech geeks. One thing that people regularly do is quantify how much of a particular activity they do, but they rarely quantify how well they do it. 
+
+Using data from accelerometers on the belt, forearm, arm, and dumbell of 6 participants. They were asked to perform barbell lifts correctly and incorrectly in 5 different ways. 
+The goal is, unsing a machine learning algorithm, to predict the manner in which they did the exercise.
+
+
+# Analisys
+## Load data
+```{r}
+library(caret)
+
+training <- read.csv(file="pml-training.csv", header=TRUE, as.is = TRUE, stringsAsFactors = FALSE, sep=',', na.strings=c('NA','','#DIV/0!'))
+testing <- read.csv(file="pml-testing.csv", header=TRUE, as.is = TRUE, stringsAsFactors = FALSE, sep=',', na.strings=c('NA','','#DIV/0!'))
+
+training$classe <- as.factor(training$classe) 
+```
+
+## Create Training and Validation sets
+```{r}
+set.seed(123)
+inTrain <- createDataPartition(y=training$classe, p=0.7, list=F)
+training1 <- training[inTrain, ]
+validation <- training[-inTrain, ]
+```
+
+## Clean data (eliminate values NA and useless valriables)
+```{r}
+mostlyNA <- sapply(training1, function(x) mean(is.na(x))) > 0.95
+training1 <- training1[, mostlyNA==F]
+
+# remove variables that don't make sense for prediction 
+# (X, user_name, raw_timestamp_part_1, raw_timestamp_part_2, cvtd_timestamp),
+# which happen to be the first five variables
+training1 <- training1[, -(1:5)]
+validation <- validation[, -(1:5)]
+```
+
+# Create a Model
+I am going to build three different models and compare them to see which provides the best accuracty. 
+
+The model types are:
+- Random forest decision trees (rf)
+- Decision trees with CART (rpart)
+- Stochastic gradient boosting trees (gbm)
+
+
+```{r}
+fitControl <- trainControl(method='cv', number = 3, allowParallel=TRUE, verboseIter=F)
+
+# Random Forest
+mod_rf <- train(classe ~., method="rf", data=training1, ntree=50,
+                trControl=fitControl)
+
+#Decision trees with CART (rpart)
+mod_cart <- train(classe ~ ., data=training1, method='rpart',
+                    trControl=fitControl)
+
+# Stochastic gradient boosting trees (gbm)
+mod_gbm <- train(classe ~ ., data=training1, method='gbm',
+                   trControl=fitControl, verbose = FALSE)
+
+mod_rf$finalModel
+mod_cart$finalModel
+mod_gbm$finalModel
+```
+
+## Accuracy on training and validation set
+I use the fitted model to predict the label (“classe”) in the validation set, and show the accuracy in each of them to compare the predicted versus the actual labels:
+
+```{r}
+# Model Evaluation
+predCART <- predict(mod_cart, newdata=validation)
+cmCART <- confusionMatrix(predCART, validation$classe)
+
+predGBM <- predict(mod_gbm, newdata=validation)
+cmGBM <- confusionMatrix(predGBM, validation$classe)
+
+predRF <- predict(mod_rf, newdata=validation)
+cmRF <- confusionMatrix(predRF, validation$classe)
+
+AccuracyResults <- data.frame(
+  Model = c('CART', 'GBM', 'RF'),
+  Accuracy = rbind(cmCART$overall[1], cmGBM$overall[1], cmRF$overall[1])
+)
+
+AccuracyResults
+```
+
+According to the accuracy results, the Random Forest is the best model, fitting 99% of the data.
+
+
+# Prediction
+I use the testing data sample to predict a classe for each of the 20 observations based on the other information we know about these observations contained in the validation sample.
+
+```{r}
+testingPred <- predict(mod_rf, testing)
+testingPred
+```
+
+# Conclusions
+The random forest model with cross-validation produces an accurate model that is sufficient for predictive analytics.
+
+
+
+
