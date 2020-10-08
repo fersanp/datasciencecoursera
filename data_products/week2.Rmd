@@ -1,0 +1,24 @@
+---
+title: "Eiffel Tower"
+author: "Fernanda Sánchez"
+date: "10/8/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Introduction
+I created a web page using R Markdown that show the Eiffel Tower in a map created with Leaflet.
+
+```{r}
+library(leaflet)
+```
+```{r}
+my_map <- leaflet() %>%
+  addTiles() %>%
+addMarkers(lat=48.8584, lng=2.2945, popup = "Eiffel Tower")
+
+my_map
+```
