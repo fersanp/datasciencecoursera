@@ -1,0 +1,32 @@
+---
+title: "Cars Presentation"
+author: "Fernanda Sánchez"
+date: "10/11/2020"
+output: ioslides_presentation
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+## Objectives
+Create a web page presentation using R Markdown that features a plot created with Plotly. 
+
+We use the mtcars dataset and plot the relationship of gas mileage (`mpg`) with weight (`wt`) of cars.
+
+
+The number of cylinders (`cyl`) is shown as colors in dots and the amount of horsepower (`hp`) as the size of each point in the plot.
+
+
+## Cars: Mileage VS Weight 
+
+```{r plot, echo=FALSE, warning=FALSE}
+suppressPackageStartupMessages(library(plotly))
+
+plot_ly(data = mtcars, x = ~wt, y = ~mpg, 
+        color = ~as.factor(cyl), size = ~hp,
+        text = ~paste("Weight: ", wt, 'MPG:', mpg),
+        type = "scatter", mode = "markers") %>%
+  layout(title = "Car Consumption")
+```
+
