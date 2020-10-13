@@ -1,0 +1,75 @@
+---
+title: "Motor Trend Car Road Tests"
+author: "Fernanda Sánchez"
+date: "10/12/2020"
+output: slidy_presentation
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+## Reproducible Pitch Presentation
+
+### Cars Consumption: comparation using Milles per Galon (MPG)
+
+The data was extracted from the 1974 Motor Trend US magazine, and comprises fuel consumption and 10 aspects of automobile design and performance for 32 automobiles (1973-74 models).
+
+### Source
+Henderson and Velleman (1981), Building multiple regression models interactively. Biometrics, 37, 391-411.
+```{r}
+library(datasets)
+library(shiny)
+
+head(mtcars, 3)
+```
+
+## Format
+
+A data frame with 32 observations on 11 (numeric) variables.
+
+[, 1]	mpg	Miles/(US) gallon
+
+[, 2]	cyl	Number of cylinders
+
+[, 3]	disp	Displacement (cu.in.)
+
+[, 4]	hp	Gross horsepower
+
+[, 5]	drat	Rear axle ratio
+
+[, 6]	wt	Weight (1000 lbs)
+
+[, 7]	qsec	1/4 mile time
+
+[, 8]	vs	Engine (0 = V-shaped, 1 = straight)
+
+[, 9]	am	Transmission (0 = automatic, 1 = manual)
+
+[,10]	gear	Number of forward gears
+
+[,11]	carb	Number of carburetors
+
+
+## Analysis - Main Code
+
+  
+    paste("mpg ~", "as.integer(", input$variable, ")")
+  
+  
+    lm(as.formula(formulaTextPoint()), data=mpgData)  
+
+  
+    summary(fit()) })
+  
+  output$mpgPlot <- renderPlot({
+  
+    with(mpgData, {
+    
+      plot(as.formula(formulaTextPoint()))
+      
+      abline(fit(), col=2)
+      
+    })  })
+
+
